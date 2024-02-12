@@ -1,6 +1,11 @@
 #include <stdio.h>
+#include <ncurses.h>
 
 int main() {
-    printf("Hello world!");
+    initscr();
+    printw("Hello world!");
+    refresh();
+    getch();
+    endwin();
     return 0;
 }
