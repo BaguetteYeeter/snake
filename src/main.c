@@ -35,6 +35,7 @@ int main() {
     refresh();
 
     mvchgat(p.y, p.x, 1, A_REVERSE, 0, NULL);
+    mvchgat(p.y, p.x*2+1, 1, A_REVERSE, 0, NULL);
 
     while (true) {
         ch = getch();
@@ -56,8 +57,10 @@ int main() {
                 p.x++;
             }
 
-            mvchgat(op.y, op.x, 1, A_NORMAL, 0, NULL);
-            mvchgat(p.y, p.x, 1, A_REVERSE, 0, NULL);
+            mvchgat(op.y, op.x*2, 1, A_NORMAL, 0, NULL);
+            mvchgat(op.y, op.x*2+1, 1, A_NORMAL, 0, NULL);
+            mvchgat(p.y, p.x*2, 1, A_REVERSE, 0, NULL);
+            mvchgat(p.y, p.x*2+1, 1, A_REVERSE, 0, NULL);
 
             //printw("%d\n", ch);
         }
