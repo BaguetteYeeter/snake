@@ -27,11 +27,14 @@ int main() {
     noecho();
     keypad(stdscr, TRUE);
     cbreak();
+    curs_set(0);
     timeout(1000);
 
     printw("Hello world!\n");
     printw("The terminal is %dx%d", row, col);
     refresh();
+
+    mvchgat(p.y, p.x, 1, A_REVERSE, 0, NULL);
 
     while (true) {
         ch = getch();
