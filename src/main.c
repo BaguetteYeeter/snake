@@ -6,9 +6,24 @@ typedef struct {
     int y;
 } pointer;
 
+enum Directions {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+};
+
+void update(pointer op, pointer p) {
+    mvchgat(op.y, op.x*2, 1, A_NORMAL, 0, NULL);
+    mvchgat(op.y, op.x*2+1, 1, A_NORMAL, 0, NULL);
+    mvchgat(p.y, p.x*2, 1, A_REVERSE, 0, NULL);
+    mvchgat(p.y, p.x*2+1, 1, A_REVERSE, 0, NULL);
+}
+
 int main() {
     int row,col;
     int ch;
+    enum Directions dir = RIGHT;
 
     pointer p;
     p.x = 0;
@@ -28,7 +43,7 @@ int main() {
     keypad(stdscr, TRUE);
     cbreak();
     curs_set(0);
-    timeout(1000);
+    timeout(500);
 
     printw("Hello world!\n");
     printw("The terminal is %dx%d", row, col);
@@ -49,20 +64,43 @@ int main() {
 
             if (ch == KEY_UP) {
                 p.y--;
+                dir = UP;
             } else if (ch == KEY_DOWN) {
                 p.y++;
+                dir = DOWN;
             } else if (ch == KEY_LEFT) {
                 p.x--;
+                dir = LEFT;
             } else if (ch == KEY_RIGHT) {
                 p.x++;
+                dir = RIGHT;
             }
 
-            mvchgat(op.y, op.x*2, 1, A_NORMAL, 0, NULL);
-            mvchgat(op.y, op.x*2+1, 1, A_NORMAL, 0, NULL);
-            mvchgat(p.y, p.x*2, 1, A_REVERSE, 0, NULL);
-            mvchgat(p.y, p.x*2+1, 1, A_REVERSE, 0, NULL);
+            update(op,p);
 
             //printw("%d\n", ch);
+        } else {
+            if (dir == UP) {
+                op.x = p.x;
+                op.y = p.y;
+                p.y--;
+                update(op, p);
+            } else if (dir == DOWN) {
+                op.x = p.x;
+                op.y = p.y;
+                p.y++;
+                update(op, p);
+            } else if (dir == LEFT) {
+                op.x = p.x;
+                op.y = p.y;
+                p.x--;
+                update(op, p);
+            } else if (dir == RIGHT) {
+                op.x = p.x;
+                op.y = p.y;
+                p.x++;
+                update(op, p);
+            }
         }
     }
     
