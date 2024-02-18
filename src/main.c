@@ -102,13 +102,13 @@ int main() {
     points->val = head;
     points->next = NULL;
 
-    pointer p1, p2;
-    p1.x = 1;
+    pointer p1;
     p1.y = 0;
-    p2.x = 2;
-    p2.y = 0;
-    array_push(points, p1);
-    array_push(points, p2);
+    for (int i = 0; i < 4; i++) {
+        p1.x = i+1;
+        array_push(points, p1);
+    }
+    
 
     initscr();
 
