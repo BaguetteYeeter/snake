@@ -79,6 +79,7 @@ int main() {
     int row,col;
     int ch;
     enum Directions dir = RIGHT;
+    bool moved;
 
     pointer p;
     p.x = 0;
@@ -128,31 +129,36 @@ int main() {
     update(op, points);
 
     while (true) {
+        moved = false;
         ch = getch();
         if (ch != ERR) {
             if (ch == KEY_F(1)) {
                 break;
             }
 
-            op = array_pop(&points);
             p = array_last(points);
 
-            if (ch == KEY_UP) {
+            if (ch == KEY_UP && p.y > 0) {
                 p.y--;
-                array_push(points, p);
                 dir = UP;
-            } else if (ch == KEY_DOWN) {
+                moved = true;
+            } else if (ch == KEY_DOWN && p.y < row-1) {
                 p.y++;
-                array_push(points, p);
                 dir = DOWN;
-            } else if (ch == KEY_LEFT) {
+                moved = true;
+            } else if (ch == KEY_LEFT && p.x > 0) {
                 p.x--;
-                array_push(points, p);
                 dir = LEFT;
-            } else if (ch == KEY_RIGHT) {
+                moved = true;
+            } else if (ch == KEY_RIGHT && p.x*2 < col-2) {
                 p.x++;
-                array_push(points, p);
                 dir = RIGHT;
+                moved = true;
+            }
+
+            if (moved) {
+                op = array_pop(&points);
+                array_push(points, p);
             }
 
             update(op,points);
