@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <ncurses.h>
 
 typedef struct {
@@ -13,11 +14,65 @@ enum Directions {
     RIGHT
 };
 
-void update(pointer op, pointer p) {
-    mvchgat(op.y, op.x*2, 1, A_NORMAL, 0, NULL);
+//all linked list stuff nicked from learn-c.org
+typedef struct node_t {
+    pointer val;
+    struct node_t * next;
+} node;
+
+void array_push(node * head, pointer val) {
+    node * current = head;
+    while (current->next != NULL) {
+        current = current->next;
+    }
+    current->next = (node *) malloc(sizeof(node));
+    current->next->val = val;
+    current->next->next = NULL;
+}
+
+pointer array_pop(node ** head) {
+    pointer retval;
+    node * next_node = NULL;
+    if (*head == NULL) {
+        return retval;
+    }
+    next_node = (*head)->next;
+    retval = (*head)->val;
+    free(*head);
+    *head = next_node;
+    return retval;
+}
+
+pointer array_last(node * head) {
+    pointer retval;
+    if (head->next == NULL) {
+        retval = head->val;
+        return retval;
+    }
+
+    node * current = head;
+    while (current->next->next != NULL) {
+        current = current->next;
+    }
+
+    retval = current->next->val;
+    return retval;
+}
+
+
+void update(pointer op, node *points) {
+    node *current = points;
+
+    mvchgat(op.y, op.x*2,   1, A_NORMAL, 0, NULL);
     mvchgat(op.y, op.x*2+1, 1, A_NORMAL, 0, NULL);
-    mvchgat(p.y, p.x*2, 1, A_REVERSE, 0, NULL);
-    mvchgat(p.y, p.x*2+1, 1, A_REVERSE, 0, NULL);
+
+    while (current != NULL) {
+        mvchgat(current->val.y, current->val.x*2,   1, A_REVERSE, 0, NULL);
+        mvchgat(current->val.y, current->val.x*2+1, 1, A_REVERSE, 0, NULL);
+        current = current->next;
+    }
+
+    refresh();
 }
 
 int main() {
@@ -34,6 +89,27 @@ int main() {
     op.x = 0;
     op.y = 0;
 
+    node * points = NULL;
+    points = (node *) malloc(sizeof(node));
+    if (points == NULL) {
+        return 1;
+    }
+
+    pointer head;
+    head.x = 0;
+    head.y = 0;
+
+    points->val = head;
+    points->next = NULL;
+
+    pointer p1, p2;
+    p1.x = 1;
+    p1.y = 0;
+    p2.x = 2;
+    p2.y = 0;
+    array_push(points, p1);
+    array_push(points, p2);
+
     initscr();
 
     getmaxyx(stdscr,row,col);
@@ -49,8 +125,7 @@ int main() {
     printw("The terminal is %dx%d", row, col);
     refresh();
 
-    mvchgat(p.y, p.x, 1, A_REVERSE, 0, NULL);
-    mvchgat(p.y, p.x*2+1, 1, A_REVERSE, 0, NULL);
+    update(op, points);
 
     while (true) {
         ch = getch();
@@ -59,47 +134,52 @@ int main() {
                 break;
             }
 
-            op.x = p.x;
-            op.y = p.y;
+            op = array_pop(&points);
+            p = array_last(points);
 
             if (ch == KEY_UP) {
                 p.y--;
+                array_push(points, p);
                 dir = UP;
             } else if (ch == KEY_DOWN) {
                 p.y++;
+                array_push(points, p);
                 dir = DOWN;
             } else if (ch == KEY_LEFT) {
                 p.x--;
+                array_push(points, p);
                 dir = LEFT;
             } else if (ch == KEY_RIGHT) {
                 p.x++;
+                array_push(points, p);
                 dir = RIGHT;
             }
 
-            update(op,p);
+            update(op,points);
 
             //printw("%d\n", ch);
         } else {
+            continue;
             if (dir == UP) {
                 op.x = p.x;
                 op.y = p.y;
                 p.y--;
-                update(op, p);
+                update(op, points);
             } else if (dir == DOWN) {
                 op.x = p.x;
                 op.y = p.y;
                 p.y++;
-                update(op, p);
+                update(op, points);
             } else if (dir == LEFT) {
                 op.x = p.x;
                 op.y = p.y;
                 p.x--;
-                update(op, p);
+                update(op, points);
             } else if (dir == RIGHT) {
                 op.x = p.x;
                 op.y = p.y;
                 p.x++;
-                update(op, p);
+                update(op, points);
             }
         }
     }
