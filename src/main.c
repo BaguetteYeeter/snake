@@ -134,6 +134,9 @@ int main() {
         if (ch != ERR) {
             if (ch == KEY_F(1)) {
                 break;
+            } else if (ch == KEY_RESIZE) {
+                getmaxyx(stdscr,row,col);
+                mvprintw(1, 0, "The terminal is %dx%d", row, col);
             }
 
             p = array_last(points);
