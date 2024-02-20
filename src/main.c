@@ -202,22 +202,22 @@ int main() {
 
                 p = array_last(points);
 
-                if (ch == KEY_UP && p.y > 0) {
+                if (ch == KEY_UP && p.y > 0 && dir != DOWN) {
                     p.y--;
                     dir = UP;
                     lastdir = UP;
                     moved = true;
-                } else if (ch == KEY_DOWN && p.y < row-1) {
+                } else if (ch == KEY_DOWN && p.y < row-1 && dir != UP) {
                     p.y++;
                     dir = DOWN;
                     lastdir = DOWN;
                     moved = true;
-                } else if (ch == KEY_LEFT && p.x > 0) {
+                } else if (ch == KEY_LEFT && p.x > 0 && dir != RIGHT) {
                     p.x--;
                     dir = LEFT;
                     lastdir = LEFT;
                     moved = true;
-                } else if (ch == KEY_RIGHT && p.x*2 < col-2) {
+                } else if (ch == KEY_RIGHT && p.x*2 < col-2 && dir != LEFT) {
                     p.x++;
                     dir = RIGHT;
                     lastdir = RIGHT;
