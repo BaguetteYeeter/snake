@@ -120,7 +120,7 @@ int main() {
     keypad(stdscr, TRUE);
     cbreak();
     curs_set(0);
-    timeout(500);
+    timeout(200);
 
     printw("Hello world!\n");
     printw("The terminal is %dx%d", row, col);
@@ -168,28 +168,28 @@ int main() {
 
             //printw("%d\n", ch);
         } else {
-            continue;
-            if (dir == UP) {
-                op.x = p.x;
-                op.y = p.y;
+            p = array_last(points);
+
+            if (dir == UP && p.y > 0) {
                 p.y--;
-                update(op, points);
-            } else if (dir == DOWN) {
-                op.x = p.x;
-                op.y = p.y;
+                moved = true;
+            } else if (dir == DOWN && p.y < row-1) {
                 p.y++;
-                update(op, points);
-            } else if (dir == LEFT) {
-                op.x = p.x;
-                op.y = p.y;
+                moved = true;
+            } else if (dir == LEFT && p.x > 0) {
                 p.x--;
-                update(op, points);
-            } else if (dir == RIGHT) {
-                op.x = p.x;
-                op.y = p.y;
+                moved = true;
+            } else if (dir == RIGHT && p.x*2 < col-2) {
                 p.x++;
-                update(op, points);
+                moved = true;
             }
+
+            if (moved) {
+                op = array_pop(&points);
+                array_push(points, p);
+            }
+
+            update(op, points);
         }
     }
     
