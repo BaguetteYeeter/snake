@@ -3,6 +3,12 @@
 #include <ncurses.h>
 #include <time.h>
 
+#define DELAY 20
+#define DELAY_MULTIPLIER 8
+
+//temporary while food doesnt exist
+#define SNAKE_LENGTH 5
+
 typedef struct {
     int x;
     int y;
@@ -109,7 +115,6 @@ int main() {
 
     struct timespec time1, time2;
     double timetaken;
-    int delay = 20;
     int keys[10];
     cleararray(keys, 10);
     
@@ -138,7 +143,7 @@ int main() {
 
     pointer p1;
     p1.y = 0;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < SNAKE_LENGTH-1; i++) {
         p1.x = i+1;
         array_push(points, p1);
     }
@@ -153,7 +158,7 @@ int main() {
     cbreak();
     keypad(stdscr, TRUE);
     curs_set(0);
-    timeout(delay);
+    timeout(DELAY);
 
     printw("Hello world!\n");
     printw("The terminal is %dx%d", row, col);
@@ -183,7 +188,7 @@ int main() {
 
         timetaken += elapsed;
 
-        if (timetaken*1000 < delay*10) {
+        if (timetaken * 1000 < DELAY * DELAY_MULTIPLIER) {
             continue;
         }
 
