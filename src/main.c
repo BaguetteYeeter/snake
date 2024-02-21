@@ -231,6 +231,14 @@ int main() {
                 } else if (ch == KEY_RESIZE) {
                     getmaxyx(stdscr,row,col);
                     mvprintw(1, 0, "The terminal is %dx%d", row, col);
+                    mvchgat(fp.y, fp.x*2, 2, A_NORMAL, 0, NULL);
+                    while (true) {
+                        fp.x = rand_lim((int) (col-1)/2);
+                        fp.y = rand_lim(row-1);
+                        if (!array_contains(points, fp)) {
+                            break;
+                        }
+                    }
                 }
 
                 p = array_last(points);
