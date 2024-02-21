@@ -66,20 +66,41 @@ pointer array_last(node * head) {
     return retval;
 }
 
+bool array_contains(node * head, pointer val) {
+    node * current = head;
+    while (current->next != NULL) {
+        if (current->val.x == val.x && current->val.y == val.y) {
+            return true;
+        }
+        current = current->next;
+    }
+    return false;
+}
 
-void update(pointer op, node *points) {
+void update(pointer op, node *points, pointer fp) {
     node *current = points;
 
-    mvchgat(op.y, op.x*2,   1, A_NORMAL, 0, NULL);
-    mvchgat(op.y, op.x*2+1, 1, A_NORMAL, 0, NULL);
+    mvchgat(op.y, op.x*2, 2, A_NORMAL, 0, NULL);
+
+    mvchgat(fp.y, fp.x*2, 2, A_REVERSE, 0, NULL);
 
     while (current != NULL) {
-        mvchgat(current->val.y, current->val.x*2,   1, A_REVERSE, 0, NULL);
-        mvchgat(current->val.y, current->val.x*2+1, 1, A_REVERSE, 0, NULL);
+        mvchgat(current->val.y, current->val.x*2, 2, A_REVERSE, 0, NULL);
         current = current->next;
     }
 
     refresh();
+}
+
+int rand_lim(int limit) {
+    int divisor = RAND_MAX/(limit+1);
+    int retval;
+
+    do { 
+        retval = rand() / divisor;
+    } while (retval > limit);
+
+    return retval;
 }
 
 //thank you stack overflow
@@ -112,13 +133,15 @@ int main() {
     enum Directions dir = RIGHT;
     enum Directions lastdir = RIGHT;
     bool moved, automoved;
+    int dontgrow = 0;
+
+    srand(time(NULL));
 
     struct timespec time1, time2;
     double timetaken;
     int keys[10];
     cleararray(keys, 10);
     
-
     pointer p;
     p.x = 0;
     p.y = 0;
@@ -164,7 +187,12 @@ int main() {
     printw("The terminal is %dx%d", row, col);
     refresh();
 
-    update(op, points);
+    //food pointer, where the food is
+    pointer fp;
+    fp.x = rand_lim((int) (col-1)/2);
+    fp.y = rand_lim(row-1);
+
+    update(op, points, fp);
 
     timetaken = 0;
 
@@ -230,11 +258,26 @@ int main() {
                 }
 
                 if (moved) {
-                    op = array_pop(&points);
+                    if (dontgrow > 0) {
+                        dontgrow--;
+                    } else {
+                        op = array_pop(&points);
+                    }
+
+                    if (p.x == fp.x && p.y == fp.y) {
+                        dontgrow += 3;
+                        while (true) {
+                            fp.x = rand_lim((int) (col-1)/2);
+                            fp.y = rand_lim(row-1);
+                            if (!array_contains(points, fp)) {
+                                break;
+                            }
+                        }
+                    }
                     array_push(points, p);
                 }
 
-                update(op,points);
+                update(op, points, fp);
 
                 //printw("%d\n", ch);
             } else if (!automoved && !moved) {
@@ -257,11 +300,26 @@ int main() {
                 }
 
                 if (moved) {
-                    op = array_pop(&points);
+                    if (dontgrow > 0) {
+                        dontgrow--;
+                    } else {
+                        op = array_pop(&points);
+                    }
+
+                    if (p.x == fp.x && p.y == fp.y) {
+                        dontgrow += 3;
+                        while (true) {
+                            fp.x = rand_lim((int) (col-1)/2);
+                            fp.y = rand_lim(row-1);
+                            if (!array_contains(points, fp)) {
+                                break;
+                            }
+                        }
+                    }
                     array_push(points, p);
                 }
 
-                update(op, points);
+                update(op, points, fp);
             }
         }
 
