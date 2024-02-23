@@ -9,4 +9,7 @@
 #define INITIAL_SNAKE_LENGTH 5
 #define SNAKE_GROWTH 3
 
+#define DIE_ON_SELF 1
+#define DIE_ON_WALL 1
+
 #endif

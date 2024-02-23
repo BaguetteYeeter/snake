@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include <time.h>
+#include <string.h>
 
 #include "struct.h"
 #include "arrays.h"
@@ -36,6 +37,31 @@ void update_food(pointer * fp, int row, int col, node * points) {
     }
 }
 
+int exit_game(int code) {
+    endwin();
+    return code;
+}
+
+int gameover(int row, int col, int score) {
+    char text[50];
+    sprintf(text, "Game over! Score = %d", score);
+    int w = strlen(text) + 4;
+    int brow = (row - 5) / 2;
+    int bcol = (col - w) / 2;
+    draw_box(brow, bcol, w, 5, text);
+    timeout(-1);
+    int ch;
+    while (true) {
+        ch = getch();
+        if (ch == KEY_UP || ch == KEY_DOWN || ch == KEY_LEFT || ch == KEY_RIGHT) {
+
+        } else {
+            break;
+        }
+    }
+    return exit_game(0);
+}
+
 int main() {
     //define some basic vars
     int row,col;
@@ -43,6 +69,7 @@ int main() {
     enum Directions dir = RIGHT;
     bool moved, automoved;
     int dontgrow = 0;
+    int score = 0;
 
     struct timespec time1, time2;
     double timetaken;
@@ -144,25 +171,58 @@ int main() {
                 p = array_last(points);
 
                 //this code is too obvious for a comment
-                if (ch == KEY_UP && p.y > 0 && dir != DOWN) {
+                if (ch == KEY_UP && dir != DOWN) {
+                    if (p.y == 0) {
+                        if (DIE_ON_WALL) {
+                            return gameover(row, col, score);
+                        } else {
+                            continue;
+                        }
+                    }
                     p.y--;
                     dir = UP;
                     moved = true;
-                } else if (ch == KEY_DOWN && p.y < row-1 && dir != UP) {
+                } else if (ch == KEY_DOWN && dir != UP) {
+                    if (p.y == row - 1) {
+                        if (DIE_ON_WALL) {
+                            return gameover(row, col, score);
+                        } else {
+                            continue;
+                        }
+                    }
                     p.y++;
                     dir = DOWN;
                     moved = true;
-                } else if (ch == KEY_LEFT && p.x > 0 && dir != RIGHT) {
+                } else if (ch == KEY_LEFT && dir != RIGHT) {
+                    if (p.x == 0) {
+                        if (DIE_ON_WALL) {
+                            return gameover(row, col, score);
+                        } else {
+                            continue;
+                        }
+                    }
                     p.x--;
                     dir = LEFT;
                     moved = true;
-                } else if (ch == KEY_RIGHT && p.x*2 < col-2 && dir != LEFT) {
+                } else if (ch == KEY_RIGHT && dir != LEFT) {
+                    if (p.x*2 == col - 2) {
+                        if (DIE_ON_WALL) {
+                            return gameover(row, col, score);
+                        } else {
+                            continue;
+                        }
+                    }
                     p.x++;
                     dir = RIGHT;
                     moved = true;
                 }
 
                 if (moved) {
+                    //if head is part of us already, we clearly hit ourselves so run game over
+                    if (DIE_ON_SELF && array_contains(points, p)) {
+                        return gameover(row, col, score);
+                    }
+
                     //dontgrow is for when food is eaten
                     if (dontgrow > 0) {
                         dontgrow--;
@@ -172,7 +232,8 @@ int main() {
 
                     //if our head is at a food piece
                     if (p.x == fp.x && p.y == fp.y) {
-                        dontgrow += 3;
+                        dontgrow += SNAKE_GROWTH;
+                        score++;
                         update_food(&fp, row, col, points);
                     }
                     array_push(points, p);
@@ -186,21 +247,53 @@ int main() {
 
                 p = array_last(points);
 
-                if (dir == UP && p.y > 0) {
+                if (dir == UP) {
+                    if (p.y == 0) {
+                        if (DIE_ON_WALL) {
+                            return gameover(row, col, score);
+                        } else {
+                            continue;
+                        }
+                    }
                     p.y--;
                     moved = true;
-                } else if (dir == DOWN && p.y < row-1) {
+                } else if (dir == DOWN) {
+                    if (p.y == row - 1) {
+                        if (DIE_ON_WALL) {
+                            return gameover(row, col, score);
+                        } else {
+                            continue;
+                        }
+                    }
                     p.y++;
                     moved = true;
-                } else if (dir == LEFT && p.x > 0) {
+                } else if (dir == LEFT) {
+                    if (p.x == 0) {
+                        if (DIE_ON_WALL) {
+                            return gameover(row, col, score);
+                        } else {
+                            continue;
+                        }
+                    }
                     p.x--;
                     moved = true;
-                } else if (dir == RIGHT && p.x*2 < col-2) {
+                } else if (dir == RIGHT) {
+                    if (p.x*2 == col - 2) {
+                        if (DIE_ON_WALL) {
+                            return gameover(row, col, score);
+                        } else {
+                            continue;
+                        }
+                    }
                     p.x++;
                     moved = true;
                 }
 
                 if (moved) {
+                    if (DIE_ON_SELF && array_contains(points, p)) {
+                        return gameover(row, col, score);
+                    }
+
                     if (dontgrow > 0) {
                         dontgrow--;
                     } else {
@@ -208,7 +301,8 @@ int main() {
                     }
 
                     if (p.x == fp.x && p.y == fp.y) {
-                        dontgrow += 3;
+                        dontgrow += SNAKE_GROWTH;
+                        score++;
                         update_food(&fp, row, col, points);
                     }
                     array_push(points, p);
@@ -222,6 +316,5 @@ int main() {
         
     } // end of main while loop
     
-    endwin();
-    return 0;
+    return exit_game(0);
 }
